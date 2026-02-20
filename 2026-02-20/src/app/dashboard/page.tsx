@@ -20,27 +20,34 @@ export default async function DashboardPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Your Boards</h1>
+      <div className="flex items-end justify-between border-b border-stone-200 pb-6">
+        <div>
+          <p className="mb-1 text-xs font-medium uppercase tracking-widest text-stone-400">
+            Dashboard
+          </p>
+          <h1 className="font-[family-name:var(--font-display)] text-3xl italic text-stone-900">
+            Your Boards
+          </h1>
+        </div>
       </div>
 
       <CreateBoardForm />
 
       {boards && boards.length > 0 ? (
-        <div className="mt-8 space-y-3">
+        <div className="mt-6 divide-y divide-stone-200">
           {boards.map((board) => (
             <div
               key={board.id}
-              className="flex items-center justify-between rounded-lg border border-foreground/10 p-4"
+              className="flex items-center justify-between py-4"
             >
               <div>
                 <Link
                   href={`/dashboard/${board.slug}`}
-                  className="font-medium hover:underline"
+                  className="font-medium text-stone-900 transition-colors hover:text-amber-600"
                 >
                   {board.title}
                 </Link>
-                <p className="mt-1 text-sm text-foreground/50">
+                <p className="mt-0.5 font-mono text-xs text-stone-400">
                   /board/{board.slug}
                 </p>
               </div>
@@ -49,9 +56,14 @@ export default async function DashboardPage() {
           ))}
         </div>
       ) : (
-        <p className="mt-8 text-center text-foreground/50">
-          No boards yet. Create one above!
-        </p>
+        <div className="mt-16 text-center">
+          <p className="font-[family-name:var(--font-display)] text-2xl italic text-stone-400">
+            No boards yet
+          </p>
+          <p className="mt-2 text-sm text-stone-400">
+            Create one above to get started.
+          </p>
+        </div>
       )}
     </div>
   );

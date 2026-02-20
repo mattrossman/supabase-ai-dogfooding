@@ -2,7 +2,13 @@
 
 import { useState } from "react";
 
-export default function CopyLinkButton({ path }: { path: string }) {
+export default function CopyLinkButton({
+  path,
+  variant = "light",
+}: {
+  path: string;
+  variant?: "light" | "ghost";
+}) {
   const [copied, setCopied] = useState(false);
 
   async function handleCopy() {
@@ -12,12 +18,23 @@ export default function CopyLinkButton({ path }: { path: string }) {
     setTimeout(() => setCopied(false), 2000);
   }
 
+  if (variant === "ghost") {
+    return (
+      <button
+        onClick={handleCopy}
+        className="shrink-0 rounded-md border border-stone-600 px-3.5 py-1.5 text-xs font-medium text-stone-300 transition-colors hover:border-stone-400 hover:text-stone-100"
+      >
+        {copied ? "✓ Copied" : "Copy link"}
+      </button>
+    );
+  }
+
   return (
     <button
       onClick={handleCopy}
-      className="rounded-lg border border-foreground/20 px-3 py-1.5 text-sm hover:bg-foreground/5 transition-colors"
+      className="shrink-0 rounded-md border border-stone-300 bg-white px-3.5 py-1.5 text-xs font-medium text-stone-600 transition-colors hover:border-stone-400 hover:text-stone-900"
     >
-      {copied ? "Copied!" : "Copy Link"}
+      {copied ? "✓ Copied" : "Copy link"}
     </button>
   );
 }

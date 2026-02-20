@@ -28,24 +28,43 @@ export default async function PublicBoardPage({
     .order("position", { ascending: true });
 
   return (
-    <main className="mx-auto max-w-2xl px-4 py-8">
-      <h1 className="text-2xl font-bold">{board.title}</h1>
-      <p className="mt-1 text-sm text-foreground/50">
-        Ask a question anonymously
-      </p>
-
-      <div className="mt-6">
-        <QuestionForm boardId={board.id} />
+    <div className="min-h-screen bg-[#f9f6f1]">
+      {/* Masthead */}
+      <div className="border-b border-stone-200 bg-stone-900 px-6 py-8">
+        <div className="mx-auto max-w-2xl">
+          <p className="mb-1 text-xs font-medium uppercase tracking-widest text-stone-500">
+            Q&amp;A Board
+          </p>
+          <h1 className="font-[family-name:var(--font-display)] text-4xl italic text-stone-100">
+            {board.title}
+          </h1>
+          <p className="mt-2 text-sm text-stone-400">
+            Ask anonymously — no sign-up required
+          </p>
+        </div>
       </div>
 
-      <div className="mt-8">
-        <h2 className="text-lg font-semibold mb-4">Questions</h2>
-        <QuestionList
-          boardId={board.id}
-          initialQuestions={questions ?? []}
-          isOwner={false}
-        />
+      <div className="mx-auto max-w-2xl px-6 py-8">
+        {/* Ask form */}
+        <div className="mb-10 border-b border-stone-200 pb-10">
+          <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-stone-400">
+            Ask a question
+          </p>
+          <QuestionForm boardId={board.id} />
+        </div>
+
+        {/* Questions */}
+        <div>
+          <p className="mb-5 text-xs font-semibold uppercase tracking-widest text-stone-400">
+            Questions
+          </p>
+          <QuestionList
+            boardId={board.id}
+            initialQuestions={questions ?? []}
+            isOwner={false}
+          />
+        </div>
       </div>
-    </main>
+    </div>
   );
 }

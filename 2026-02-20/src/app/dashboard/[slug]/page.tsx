@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect, notFound } from "next/navigation";
 import QuestionList from "@/app/components/question-list";
 import CopyLinkButton from "@/app/components/copy-link-button";
+import Link from "next/link";
 
 export default async function OwnerBoardPage({
   params,
@@ -38,24 +39,31 @@ export default async function OwnerBoardPage({
 
   return (
     <div>
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">{board.title}</h1>
-          <p className="mt-1 text-sm text-foreground/50">
-            Owner view &middot; /board/{board.slug}
-          </p>
+      <div className="mb-8 border-b border-stone-200 pb-6">
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <p className="mb-1 text-xs font-medium uppercase tracking-widest text-stone-400">
+              <Link href="/dashboard" className="hover:text-stone-600">
+                Boards
+              </Link>{" "}
+              / Owner view
+            </p>
+            <h1 className="font-[family-name:var(--font-display)] text-3xl italic text-stone-900">
+              {board.title}
+            </h1>
+            <p className="mt-1.5 font-mono text-xs text-stone-400">
+              /board/{board.slug}
+            </p>
+          </div>
+          <CopyLinkButton path={`/board/${board.slug}`} />
         </div>
-        <CopyLinkButton path={`/board/${board.slug}`} />
       </div>
 
-      <div className="mt-8">
-        <h2 className="text-lg font-semibold mb-4">Questions</h2>
-        <QuestionList
-          boardId={board.id}
-          initialQuestions={questions ?? []}
-          isOwner={true}
-        />
-      </div>
+      <QuestionList
+        boardId={board.id}
+        initialQuestions={questions ?? []}
+        isOwner={true}
+      />
     </div>
   );
 }

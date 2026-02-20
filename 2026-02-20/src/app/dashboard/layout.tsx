@@ -18,21 +18,24 @@ export default function DashboardLayout({
   }
 
   return (
-    <div className="min-h-screen">
-      <header className="border-b border-foreground/10">
-        <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-3">
-          <Link href="/dashboard" className="text-lg font-bold">
+    <div className="min-h-screen bg-[#f9f6f1]">
+      <header className="border-b border-stone-200 bg-stone-900">
+        <div className="mx-auto flex max-w-4xl items-center justify-between px-6 py-4">
+          <Link
+            href="/dashboard"
+            className="font-[family-name:var(--font-display)] text-lg italic text-stone-100"
+          >
             AskBoard
           </Link>
           <button
             onClick={handleSignOut}
-            className="rounded-lg border border-foreground/20 px-3 py-1.5 text-sm hover:bg-foreground/5 transition-colors"
+            className="text-sm text-stone-400 transition-colors hover:text-stone-100"
           >
-            Sign Out
+            Sign out
           </button>
         </div>
       </header>
-      <div className="mx-auto max-w-4xl px-4 py-8">{children}</div>
+      <div className="mx-auto max-w-4xl px-6 py-10">{children}</div>
     </div>
   );
 }

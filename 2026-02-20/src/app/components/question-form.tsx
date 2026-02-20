@@ -34,10 +34,10 @@ export default function QuestionForm({ boardId }: { boardId: string }) {
       <textarea
         value={content}
         onChange={(e) => setContent(e.target.value)}
-        placeholder="Ask a question..."
+        placeholder="What would you like to ask?"
         required
         rows={3}
-        className="block w-full rounded-lg border border-foreground/20 bg-background px-3 py-2 text-sm focus:border-foreground focus:outline-none resize-none"
+        className="block w-full resize-none rounded-lg border border-stone-300 bg-white px-4 py-3 text-sm text-stone-900 placeholder:text-stone-400 transition-colors focus:border-stone-900 focus:outline-none focus:ring-2 focus:ring-stone-900/10"
       />
       <div className="flex gap-2">
         <input
@@ -45,14 +45,14 @@ export default function QuestionForm({ boardId }: { boardId: string }) {
           value={authorName}
           onChange={(e) => setAuthorName(e.target.value)}
           placeholder="Your name (optional)"
-          className="flex-1 rounded-lg border border-foreground/20 bg-background px-3 py-2 text-sm focus:border-foreground focus:outline-none"
+          className="flex-1 rounded-lg border border-stone-300 bg-white px-4 py-2.5 text-sm text-stone-900 placeholder:text-stone-400 transition-colors focus:border-stone-900 focus:outline-none focus:ring-2 focus:ring-stone-900/10"
         />
         <button
           type="submit"
           disabled={loading}
-          className="rounded-lg bg-foreground px-4 py-2 text-sm font-medium text-background hover:opacity-90 transition-opacity disabled:opacity-50"
+          className="rounded-lg bg-stone-900 px-6 py-2.5 text-sm font-semibold text-white transition-all hover:bg-stone-800 disabled:opacity-50"
         >
-          {loading ? "Sending..." : submitted ? "Sent!" : "Ask"}
+          {loading ? "Sending…" : submitted ? "Sent!" : "Ask"}
         </button>
       </div>
     </form>

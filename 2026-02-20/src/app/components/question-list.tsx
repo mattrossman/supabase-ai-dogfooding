@@ -64,6 +64,9 @@ export default function QuestionList({
   isOwner: boolean;
 }) {
   const [questions, setQuestions] = useState<Question[]>(initialQuestions);
+  const [collapsed, setCollapsed] = useState<Partial<Record<Group, boolean>>>(
+    {}
+  );
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -146,7 +149,6 @@ export default function QuestionList({
     const overQ = questions.find((q) => q.id === over.id);
     if (!activeQ || !overQ) return;
 
-    // Only allow reorder within same group
     if (getGroup(activeQ) !== getGroup(overQ)) return;
 
     const groups = splitIntoGroups(questions);
@@ -155,10 +157,8 @@ export default function QuestionList({
     const newIndex = group.findIndex((q) => q.id === over.id);
     const reordered = arrayMove(group, oldIndex, newIndex);
 
-    // Assign new positions
     const updates = reordered.map((q, i) => ({ id: q.id, position: i + 1 }));
 
-    // Optimistic update
     setQuestions((prev) =>
       prev.map((q) => {
         const update = updates.find((u) => u.id === q.id);
@@ -166,26 +166,29 @@ export default function QuestionList({
       })
     );
 
-    // Persist to DB
     const supabase = createClient();
-    await supabase.rpc("reorder_questions", {
-      payload: updates,
-    });
+    await supabase.rpc("reorder_questions", { payload: updates });
+  }
+
+  function toggleGroup(g: Group) {
+    setCollapsed((prev) => ({ ...prev, [g]: !prev[g] }));
   }
 
   const sorted = sortQuestions(questions);
 
   if (sorted.length === 0) {
     return (
-      <p className="text-center text-foreground/50 py-8">
-        No questions yet. {isOwner ? "Share the board link to get started!" : "Be the first to ask!"}
+      <p className="py-8 text-center font-[family-name:var(--font-display)] text-xl italic text-stone-400">
+        {isOwner
+          ? "No questions yet — share the link to get started."
+          : "Be the first to ask."}
       </p>
     );
   }
 
   if (!isOwner) {
     return (
-      <div className="space-y-3">
+      <div>
         {sorted.map((question) => (
           <QuestionCard key={question.id} question={question} />
         ))}
@@ -196,11 +199,6 @@ export default function QuestionList({
   const groups = splitIntoGroups(questions);
   const groupOrder: Group[] = ["pinned", "answered", "regular"];
   const activeGroups = groupOrder.filter((g) => groups[g].length > 0);
-  const [collapsed, setCollapsed] = useState<Partial<Record<Group, boolean>>>({});
-
-  function toggleGroup(g: Group) {
-    setCollapsed((prev) => ({ ...prev, [g]: !prev[g] }));
-  }
 
   return (
     <DndContext
@@ -209,24 +207,31 @@ export default function QuestionList({
       collisionDetection={closestCenter}
       onDragEnd={handleDragEnd}
     >
-      <div className="space-y-6">
+      <div className="space-y-8">
         {activeGroups.map((groupKey) => (
           <div key={groupKey}>
             {activeGroups.length > 1 && (
               <button
                 onClick={() => toggleGroup(groupKey)}
-                className="flex items-center gap-1.5 mb-2 group"
+                className="group mb-1 flex items-center gap-2"
               >
                 <svg
-                  width="12"
-                  height="12"
+                  width="10"
+                  height="10"
                   viewBox="0 0 12 12"
                   fill="currentColor"
-                  className={`text-foreground/30 transition-transform ${collapsed[groupKey] ? "-rotate-90" : ""}`}
+                  className={`text-stone-400 transition-transform ${collapsed[groupKey] ? "-rotate-90" : ""}`}
                 >
-                  <path d="M2 3l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+                  <path
+                    d="M2 3l4 4 4-4"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    fill="none"
+                  />
                 </svg>
-                <span className="text-xs font-medium text-foreground/40 uppercase tracking-wide group-hover:text-foreground/60 transition-colors">
+                <span className="text-xs font-semibold uppercase tracking-widest text-stone-400 transition-colors group-hover:text-stone-600">
                   {GROUP_LABELS[groupKey]} ({groups[groupKey].length})
                 </span>
               </button>
@@ -236,7 +241,7 @@ export default function QuestionList({
                 items={groups[groupKey].map((q) => q.id)}
                 strategy={verticalListSortingStrategy}
               >
-                <div className="space-y-3">
+                <div>
                   {groups[groupKey].map((question) => (
                     <SortableQuestionCard
                       key={question.id}

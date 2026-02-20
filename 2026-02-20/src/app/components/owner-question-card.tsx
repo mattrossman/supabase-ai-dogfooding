@@ -54,15 +54,15 @@ export default function OwnerQuestionCard({
   }
 
   return (
-    <div className="rounded-lg border border-foreground/10 p-4">
-      <div className="flex items-start justify-between gap-2">
+    <div className="border-b border-stone-200 py-4 last:border-0">
+      <div className="flex items-start gap-3">
         {dragHandleProps && (
           <button
             ref={dragHandleRef}
-            className="cursor-grab shrink-0 touch-none text-foreground/30 hover:text-foreground/60 mt-0.5"
+            className="mt-0.5 shrink-0 cursor-grab touch-none text-stone-300 transition-colors hover:text-stone-500"
             {...dragHandleProps}
           >
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
               <circle cx="5" cy="3" r="1.5" />
               <circle cx="11" cy="3" r="1.5" />
               <circle cx="5" cy="8" r="1.5" />
@@ -72,84 +72,96 @@ export default function OwnerQuestionCard({
             </svg>
           </button>
         )}
-        <p className="text-sm flex-1">{question.content}</p>
-        <div className="flex shrink-0 gap-1">
-          {question.is_pinned && (
-            <span className="rounded bg-amber-100 px-1.5 py-0.5 text-xs font-medium text-amber-800 dark:bg-amber-900/30 dark:text-amber-300">
-              Pinned
-            </span>
+
+        <div className="min-w-0 flex-1">
+          <div className="flex items-start justify-between gap-3">
+            <p className="text-sm leading-relaxed text-stone-800">
+              {question.content}
+            </p>
+            <div className="flex shrink-0 gap-1.5">
+              {question.is_pinned && (
+                <span className="rounded bg-amber-100 px-2 py-0.5 text-xs font-semibold uppercase tracking-wide text-amber-700">
+                  Pinned
+                </span>
+              )}
+              {question.is_answered && (
+                <span className="rounded bg-stone-100 px-2 py-0.5 text-xs font-semibold uppercase tracking-wide text-stone-500">
+                  Answered
+                </span>
+              )}
+            </div>
+          </div>
+
+          <p className="mt-1.5 text-xs text-stone-400">
+            {question.author_name || "Anonymous"} &middot;{" "}
+            {new Date(question.created_at).toLocaleString()}
+          </p>
+
+          {question.reply && !isReplying && (
+            <div className="mt-3 border-l-2 border-amber-400 pl-3">
+              <p className="text-xs font-semibold uppercase tracking-wide text-stone-400">
+                Your reply
+              </p>
+              <p className="mt-1 text-sm text-stone-700">{question.reply}</p>
+            </div>
           )}
-          {question.is_answered && (
-            <span className="rounded bg-green-100 px-1.5 py-0.5 text-xs font-medium text-green-800 dark:bg-green-900/30 dark:text-green-300">
-              Answered
-            </span>
+
+          {isReplying && (
+            <form onSubmit={handleReply} className="mt-3 flex gap-2">
+              <input
+                type="text"
+                value={replyText}
+                onChange={(e) => setReplyText(e.target.value)}
+                placeholder="Write a reply…"
+                className="flex-1 rounded-lg border border-stone-300 bg-white px-3 py-1.5 text-sm transition-colors focus:border-stone-900 focus:outline-none focus:ring-2 focus:ring-stone-900/10"
+              />
+              <button
+                type="submit"
+                disabled={loading}
+                className="rounded-lg bg-stone-900 px-4 py-1.5 text-sm font-semibold text-white transition-all hover:bg-stone-800 disabled:opacity-50"
+              >
+                {loading ? "…" : "Send"}
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsReplying(false)}
+                className="rounded-lg border border-stone-300 px-3 py-1.5 text-sm text-stone-600 transition-colors hover:bg-stone-50"
+              >
+                Cancel
+              </button>
+            </form>
           )}
+
+          <div className="mt-3 flex flex-wrap gap-2">
+            <button
+              onClick={() => setIsReplying(!isReplying)}
+              className="text-xs font-medium text-stone-500 underline underline-offset-2 transition-opacity hover:opacity-70"
+            >
+              {question.reply ? "Edit reply" : "Reply"}
+            </button>
+            <span className="text-stone-300">·</span>
+            <button
+              onClick={handleTogglePin}
+              className="text-xs font-medium text-stone-500 underline underline-offset-2 transition-opacity hover:opacity-70"
+            >
+              {question.is_pinned ? "Unpin" : "Pin"}
+            </button>
+            <span className="text-stone-300">·</span>
+            <button
+              onClick={handleToggleAnswered}
+              className="text-xs font-medium text-stone-500 underline underline-offset-2 transition-opacity hover:opacity-70"
+            >
+              {question.is_answered ? "Mark unanswered" : "Mark answered"}
+            </button>
+            <span className="text-stone-300">·</span>
+            <button
+              onClick={handleDelete}
+              className="text-xs font-medium text-red-500 underline underline-offset-2 transition-opacity hover:opacity-70"
+            >
+              Delete
+            </button>
+          </div>
         </div>
-      </div>
-
-      <p className="mt-2 text-xs text-foreground/50">
-        {question.author_name || "Anonymous"} &middot;{" "}
-        {new Date(question.created_at).toLocaleString()}
-      </p>
-
-      {question.reply && !isReplying && (
-        <div className="mt-3 rounded-lg bg-foreground/5 p-3">
-          <p className="text-xs font-medium text-foreground/60">Your reply</p>
-          <p className="mt-1 text-sm">{question.reply}</p>
-        </div>
-      )}
-
-      {isReplying && (
-        <form onSubmit={handleReply} className="mt-3 flex gap-2">
-          <input
-            type="text"
-            value={replyText}
-            onChange={(e) => setReplyText(e.target.value)}
-            placeholder="Write a reply..."
-            className="flex-1 rounded-lg border border-foreground/20 bg-background px-3 py-1.5 text-sm focus:border-foreground focus:outline-none"
-          />
-          <button
-            type="submit"
-            disabled={loading}
-            className="rounded-lg bg-foreground px-3 py-1.5 text-sm font-medium text-background hover:opacity-90 disabled:opacity-50"
-          >
-            {loading ? "..." : "Send"}
-          </button>
-          <button
-            type="button"
-            onClick={() => setIsReplying(false)}
-            className="rounded-lg border border-foreground/20 px-3 py-1.5 text-sm hover:bg-foreground/5"
-          >
-            Cancel
-          </button>
-        </form>
-      )}
-
-      <div className="mt-3 flex gap-2">
-        <button
-          onClick={() => setIsReplying(!isReplying)}
-          className="rounded border border-foreground/20 px-2 py-1 text-xs hover:bg-foreground/5 transition-colors"
-        >
-          {question.reply ? "Edit Reply" : "Reply"}
-        </button>
-        <button
-          onClick={handleTogglePin}
-          className="rounded border border-foreground/20 px-2 py-1 text-xs hover:bg-foreground/5 transition-colors"
-        >
-          {question.is_pinned ? "Unpin" : "Pin"}
-        </button>
-        <button
-          onClick={handleToggleAnswered}
-          className="rounded border border-foreground/20 px-2 py-1 text-xs hover:bg-foreground/5 transition-colors"
-        >
-          {question.is_answered ? "Mark Unanswered" : "Mark Answered"}
-        </button>
-        <button
-          onClick={handleDelete}
-          className="rounded border border-red-300 px-2 py-1 text-xs text-red-600 hover:bg-red-50 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-950 transition-colors"
-        >
-          Delete
-        </button>
       </div>
     </div>
   );
