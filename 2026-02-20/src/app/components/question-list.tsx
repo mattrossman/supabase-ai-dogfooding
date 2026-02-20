@@ -196,6 +196,11 @@ export default function QuestionList({
   const groups = splitIntoGroups(questions);
   const groupOrder: Group[] = ["pinned", "answered", "regular"];
   const activeGroups = groupOrder.filter((g) => groups[g].length > 0);
+  const [collapsed, setCollapsed] = useState<Partial<Record<Group, boolean>>>({});
+
+  function toggleGroup(g: Group) {
+    setCollapsed((prev) => ({ ...prev, [g]: !prev[g] }));
+  }
 
   return (
     <DndContext
@@ -208,24 +213,40 @@ export default function QuestionList({
         {activeGroups.map((groupKey) => (
           <div key={groupKey}>
             {activeGroups.length > 1 && (
-              <p className="text-xs font-medium text-foreground/40 uppercase tracking-wide mb-2">
-                {GROUP_LABELS[groupKey]}
-              </p>
+              <button
+                onClick={() => toggleGroup(groupKey)}
+                className="flex items-center gap-1.5 mb-2 group"
+              >
+                <svg
+                  width="12"
+                  height="12"
+                  viewBox="0 0 12 12"
+                  fill="currentColor"
+                  className={`text-foreground/30 transition-transform ${collapsed[groupKey] ? "-rotate-90" : ""}`}
+                >
+                  <path d="M2 3l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+                </svg>
+                <span className="text-xs font-medium text-foreground/40 uppercase tracking-wide group-hover:text-foreground/60 transition-colors">
+                  {GROUP_LABELS[groupKey]} ({groups[groupKey].length})
+                </span>
+              </button>
             )}
-            <SortableContext
-              items={groups[groupKey].map((q) => q.id)}
-              strategy={verticalListSortingStrategy}
-            >
-              <div className="space-y-3">
-                {groups[groupKey].map((question) => (
-                  <SortableQuestionCard
-                    key={question.id}
-                    question={question}
-                    onDelete={handleDelete}
-                  />
-                ))}
-              </div>
-            </SortableContext>
+            {!collapsed[groupKey] && (
+              <SortableContext
+                items={groups[groupKey].map((q) => q.id)}
+                strategy={verticalListSortingStrategy}
+              >
+                <div className="space-y-3">
+                  {groups[groupKey].map((question) => (
+                    <SortableQuestionCard
+                      key={question.id}
+                      question={question}
+                      onDelete={handleDelete}
+                    />
+                  ))}
+                </div>
+              </SortableContext>
+            )}
           </div>
         ))}
       </div>
