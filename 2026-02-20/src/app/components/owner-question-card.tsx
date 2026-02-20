@@ -9,9 +9,13 @@ type Question = Database["public"]["Tables"]["questions"]["Row"];
 export default function OwnerQuestionCard({
   question,
   onDelete,
+  dragHandleProps,
+  dragHandleRef,
 }: {
   question: Question;
   onDelete: (id: string) => void;
+  dragHandleProps?: Record<string, unknown>;
+  dragHandleRef?: (node: HTMLElement | null) => void;
 }) {
   const [replyText, setReplyText] = useState(question.reply ?? "");
   const [isReplying, setIsReplying] = useState(false);
@@ -21,14 +25,14 @@ export default function OwnerQuestionCard({
   async function handleTogglePin() {
     await supabase
       .from("questions")
-      .update({ is_pinned: !question.is_pinned })
+      .update({ is_pinned: !question.is_pinned, position: 0 })
       .eq("id", question.id);
   }
 
   async function handleToggleAnswered() {
     await supabase
       .from("questions")
-      .update({ is_answered: !question.is_answered })
+      .update({ is_answered: !question.is_answered, position: 0 })
       .eq("id", question.id);
   }
 
@@ -38,7 +42,7 @@ export default function OwnerQuestionCard({
     setLoading(true);
     await supabase
       .from("questions")
-      .update({ reply: replyText.trim(), is_answered: true })
+      .update({ reply: replyText.trim(), is_answered: true, position: 0 })
       .eq("id", question.id);
     setLoading(false);
     setIsReplying(false);
@@ -52,7 +56,23 @@ export default function OwnerQuestionCard({
   return (
     <div className="rounded-lg border border-foreground/10 p-4">
       <div className="flex items-start justify-between gap-2">
-        <p className="text-sm">{question.content}</p>
+        {dragHandleProps && (
+          <button
+            ref={dragHandleRef}
+            className="cursor-grab shrink-0 touch-none text-foreground/30 hover:text-foreground/60 mt-0.5"
+            {...dragHandleProps}
+          >
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+              <circle cx="5" cy="3" r="1.5" />
+              <circle cx="11" cy="3" r="1.5" />
+              <circle cx="5" cy="8" r="1.5" />
+              <circle cx="11" cy="8" r="1.5" />
+              <circle cx="5" cy="13" r="1.5" />
+              <circle cx="11" cy="13" r="1.5" />
+            </svg>
+          </button>
+        )}
+        <p className="text-sm flex-1">{question.content}</p>
         <div className="flex shrink-0 gap-1">
           {question.is_pinned && (
             <span className="rounded bg-amber-100 px-1.5 py-0.5 text-xs font-medium text-amber-800 dark:bg-amber-900/30 dark:text-amber-300">

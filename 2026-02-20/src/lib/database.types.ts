@@ -67,6 +67,7 @@ export type Database = {
           id: string
           is_answered: boolean
           is_pinned: boolean
+          position: number
           reply: string | null
         }
         Insert: {
@@ -77,6 +78,7 @@ export type Database = {
           id?: string
           is_answered?: boolean
           is_pinned?: boolean
+          position?: number
           reply?: string | null
         }
         Update: {
@@ -87,6 +89,7 @@ export type Database = {
           id?: string
           is_answered?: boolean
           is_pinned?: boolean
+          position?: number
           reply?: string | null
         }
         Relationships: [
@@ -104,7 +107,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      reorder_questions: { Args: { payload: Json }; Returns: undefined }
     }
     Enums: {
       [_ in never]: never

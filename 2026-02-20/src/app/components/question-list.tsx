@@ -1,10 +1,25 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+  arrayMove,
+} from "@dnd-kit/sortable";
 import { createClient } from "@/lib/supabase/client";
 import type { Database } from "@/lib/database.types";
 import QuestionCard from "./question-card";
-import OwnerQuestionCard from "./owner-question-card";
+import SortableQuestionCard from "./sortable-question-card";
 
 type Question = Database["public"]["Tables"]["questions"]["Row"];
 
@@ -12,9 +27,32 @@ function sortQuestions(questions: Question[]): Question[] {
   return [...questions].sort((a, b) => {
     if (a.is_pinned !== b.is_pinned) return a.is_pinned ? -1 : 1;
     if (a.is_answered !== b.is_answered) return a.is_answered ? -1 : 1;
-    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    return a.position - b.position;
   });
 }
+
+type Group = "pinned" | "answered" | "regular";
+
+function getGroup(q: Question): Group {
+  if (q.is_pinned) return "pinned";
+  if (q.is_answered) return "answered";
+  return "regular";
+}
+
+function splitIntoGroups(questions: Question[]) {
+  const sorted = sortQuestions(questions);
+  return {
+    pinned: sorted.filter((q) => q.is_pinned),
+    answered: sorted.filter((q) => !q.is_pinned && q.is_answered),
+    regular: sorted.filter((q) => !q.is_pinned && !q.is_answered),
+  };
+}
+
+const GROUP_LABELS: Record<Group, string> = {
+  pinned: "Pinned",
+  answered: "Answered",
+  regular: "Questions",
+};
 
 export default function QuestionList({
   boardId,
@@ -26,7 +64,15 @@ export default function QuestionList({
   isOwner: boolean;
 }) {
   const [questions, setQuestions] = useState<Question[]>(initialQuestions);
-  const sorted = sortQuestions(questions);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: { distance: 5 },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
   useEffect(() => {
     const supabase = createClient();
@@ -92,6 +138,43 @@ export default function QuestionList({
     setQuestions((prev) => prev.filter((q) => q.id !== id));
   }
 
+  async function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    const activeQ = questions.find((q) => q.id === active.id);
+    const overQ = questions.find((q) => q.id === over.id);
+    if (!activeQ || !overQ) return;
+
+    // Only allow reorder within same group
+    if (getGroup(activeQ) !== getGroup(overQ)) return;
+
+    const groups = splitIntoGroups(questions);
+    const group = groups[getGroup(activeQ)];
+    const oldIndex = group.findIndex((q) => q.id === active.id);
+    const newIndex = group.findIndex((q) => q.id === over.id);
+    const reordered = arrayMove(group, oldIndex, newIndex);
+
+    // Assign new positions
+    const updates = reordered.map((q, i) => ({ id: q.id, position: i + 1 }));
+
+    // Optimistic update
+    setQuestions((prev) =>
+      prev.map((q) => {
+        const update = updates.find((u) => u.id === q.id);
+        return update ? { ...q, position: update.position } : q;
+      })
+    );
+
+    // Persist to DB
+    const supabase = createClient();
+    await supabase.rpc("reorder_questions", {
+      payload: updates,
+    });
+  }
+
+  const sorted = sortQuestions(questions);
+
   if (sorted.length === 0) {
     return (
       <p className="text-center text-foreground/50 py-8">
@@ -100,19 +183,52 @@ export default function QuestionList({
     );
   }
 
-  return (
-    <div className="space-y-3">
-      {sorted.map((question) =>
-        isOwner ? (
-          <OwnerQuestionCard
-            key={question.id}
-            question={question}
-            onDelete={handleDelete}
-          />
-        ) : (
+  if (!isOwner) {
+    return (
+      <div className="space-y-3">
+        {sorted.map((question) => (
           <QuestionCard key={question.id} question={question} />
-        )
-      )}
-    </div>
+        ))}
+      </div>
+    );
+  }
+
+  const groups = splitIntoGroups(questions);
+  const groupOrder: Group[] = ["pinned", "answered", "regular"];
+  const activeGroups = groupOrder.filter((g) => groups[g].length > 0);
+
+  return (
+    <DndContext
+      id="question-list-dnd"
+      sensors={sensors}
+      collisionDetection={closestCenter}
+      onDragEnd={handleDragEnd}
+    >
+      <div className="space-y-6">
+        {activeGroups.map((groupKey) => (
+          <div key={groupKey}>
+            {activeGroups.length > 1 && (
+              <p className="text-xs font-medium text-foreground/40 uppercase tracking-wide mb-2">
+                {GROUP_LABELS[groupKey]}
+              </p>
+            )}
+            <SortableContext
+              items={groups[groupKey].map((q) => q.id)}
+              strategy={verticalListSortingStrategy}
+            >
+              <div className="space-y-3">
+                {groups[groupKey].map((question) => (
+                  <SortableQuestionCard
+                    key={question.id}
+                    question={question}
+                    onDelete={handleDelete}
+                  />
+                ))}
+              </div>
+            </SortableContext>
+          </div>
+        ))}
+      </div>
+    </DndContext>
   );
 }

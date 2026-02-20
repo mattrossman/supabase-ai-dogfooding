@@ -47,21 +47,18 @@ async function main() {
   const { data: questions, error: questionsError } = await supabase
     .from("questions")
     .insert([
-      {
-        board_id: board.id,
-        content: "What's the roadmap for Q3?",
-        author_name: "Alice",
-      },
-      {
-        board_id: board.id,
-        content: "How do you handle on-call rotations?",
-        author_name: null,
-      },
-      {
-        board_id: board.id,
-        content: "Any plans to open-source the SDK?",
-        author_name: "Bob",
-      },
+      // Will be marked answered
+      { board_id: board.id, content: "What's the roadmap for Q3?", author_name: "Alice" },
+      { board_id: board.id, content: "How often do you ship releases?", author_name: "Carol" },
+      { board_id: board.id, content: "Is there a public changelog?", author_name: null },
+      // Will be pinned
+      { board_id: board.id, content: "Any plans to open-source the SDK?", author_name: "Bob" },
+      { board_id: board.id, content: "What's the best way to get support?", author_name: "Dave" },
+      { board_id: board.id, content: "Do you have a community forum?", author_name: null },
+      // Regular (unanswered, unpinned)
+      { board_id: board.id, content: "How do you handle on-call rotations?", author_name: null },
+      { board_id: board.id, content: "What does the interview process look like?", author_name: "Eve" },
+      { board_id: board.id, content: "Are there remote-friendly roles?", author_name: "Frank" },
     ])
     .select();
 
@@ -72,28 +69,33 @@ async function main() {
 
   console.log("Created", questions.length, "questions");
 
-  // 4. Reply to first question + mark answered
+  // 4. Mark first 3 as answered
   const { error: replyError } = await supabase
     .from("questions")
-    .update({
-      reply: "We're focusing on performance and new integrations.",
-      is_answered: true,
-    })
+    .update({ reply: "We're focusing on performance and new integrations.", is_answered: true })
     .eq("id", questions[0].id);
+  await supabase
+    .from("questions")
+    .update({ reply: "We aim for weekly releases on Fridays.", is_answered: true })
+    .eq("id", questions[1].id);
+  await supabase
+    .from("questions")
+    .update({ reply: "Yes! Check out our blog for updates.", is_answered: true })
+    .eq("id", questions[2].id);
 
   if (replyError) {
-    console.error("Failed to add reply:", replyError.message);
+    console.error("Failed to add replies:", replyError.message);
     process.exit(1);
   }
 
-  // 5. Pin third question
+  // 5. Pin questions 3–5
   const { error: pinError } = await supabase
     .from("questions")
     .update({ is_pinned: true })
-    .eq("id", questions[2].id);
+    .in("id", [questions[3].id, questions[4].id, questions[5].id]);
 
   if (pinError) {
-    console.error("Failed to pin question:", pinError.message);
+    console.error("Failed to pin questions:", pinError.message);
     process.exit(1);
   }
 

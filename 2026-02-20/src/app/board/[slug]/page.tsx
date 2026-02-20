@@ -23,7 +23,9 @@ export default async function PublicBoardPage({
     .from("questions")
     .select("*")
     .eq("board_id", board.id)
-    .order("created_at", { ascending: false });
+    .order("is_pinned", { ascending: false })
+    .order("is_answered", { ascending: false })
+    .order("position", { ascending: true });
 
   return (
     <main className="mx-auto max-w-2xl px-4 py-8">

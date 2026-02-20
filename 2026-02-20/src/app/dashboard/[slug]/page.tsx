@@ -32,7 +32,9 @@ export default async function OwnerBoardPage({
     .from("questions")
     .select("*")
     .eq("board_id", board.id)
-    .order("created_at", { ascending: false });
+    .order("is_pinned", { ascending: false })
+    .order("is_answered", { ascending: false })
+    .order("position", { ascending: true });
 
   return (
     <div>
