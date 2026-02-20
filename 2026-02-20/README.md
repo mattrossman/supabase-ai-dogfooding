@@ -79,6 +79,12 @@ Keep both windows open side-by-side:
 2. Reply to a question from the owner view → the reply appears on the public page
 3. Pin a question → it moves to the top on both views
 
+## Agent Skills
+
+This project uses the following Claude Code agent skills:
+
+- **next-best-practices** — sourced from https://github.com/vercel-labs/next-skills
+
 ## Supabase Studio
 
 Browse your local database at http://127.0.0.1:54323.
