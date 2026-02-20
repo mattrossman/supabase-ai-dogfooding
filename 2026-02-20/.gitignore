@@ -38,5 +38,10 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# claude code
+.claude/*
+!.claude/settings.json
+!.claude/skills/
+
 # ignore folders (planning/brainstorming)
 ignore/
