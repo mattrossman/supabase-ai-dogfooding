@@ -12,5 +12,11 @@ export default async function NotesPage() {
     redirect("/login");
   }
 
-  return <NotesUI />;
+  const { data: notes } = await supabase
+    .from("notes")
+    .select("id, content")
+    .order("created_at", { ascending: false })
+    .limit(50);
+
+  return <NotesUI initialNotes={notes ?? []} />;
 }

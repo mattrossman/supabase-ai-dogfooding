@@ -3,89 +3,74 @@
 import { useState, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
+import { searchNotes, triggerEmbedding } from "./actions";
 
 type Note = { id: number; content: string };
 
-export function NotesUI() {
+export function NotesUI({ initialNotes }: { initialNotes: Note[] }) {
+  const [notes, setNotes] = useState<Note[]>(initialNotes);
   const [content, setContent] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
-  const [results, setResults] = useState<Note[]>([]);
+  const [results, setResults] = useState<Note[] | null>(null);
   const [searching, setSearching] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
   const supabase = createClient();
 
   const saveNote = useCallback(async () => {
     if (!content.trim()) return;
     setSaving(true);
+    setError(null);
 
     const {
       data: { user },
     } = await supabase.auth.getUser();
     if (!user) {
       router.push("/login");
+      setSaving(false);
       return;
     }
 
-    const { data: note, error } = await supabase
+    const { data: note, error: insertError } = await supabase
       .from("notes")
       .insert({ user_id: user.id, content: content.trim() })
       .select("id")
       .single();
 
-    if (error) {
+    if (insertError) {
+      setError(insertError.message);
       setSaving(false);
       return;
     }
 
-    // Trigger embedding generation (fire-and-forget)
-    const { data: session } = await supabase.auth.getSession();
-    const token = session?.session?.access_token;
-    if (token) {
-      fetch(
-        `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/generate-embedding`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ note_id: note.id }),
-        }
-      ).catch(() => {});
-    }
-
+    setNotes((prev) => [{ id: note.id, content: content.trim() }, ...prev]);
     setContent("");
     setSaving(false);
+    triggerEmbedding(note.id);
+    router.refresh();
   }, [content, supabase, router]);
 
   const search = useCallback(async () => {
     if (!searchQuery.trim()) return;
     setSearching(true);
-
-    const { data: session } = await supabase.auth.getSession();
-    const token = session?.session?.access_token;
-    if (!token) {
+    setError(null);
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
       router.push("/login");
+      setSearching(false);
       return;
     }
-
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/search`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ query: searchQuery.trim() }),
-      }
-    );
-
-    const json = await res.json();
-    setResults(json.results ?? []);
+    const data = await searchNotes(searchQuery.trim());
+    setResults(data);
     setSearching(false);
   }, [searchQuery, supabase, router]);
+
+  const deleteNote = useCallback(async (id: number) => {
+    setNotes((prev) => prev.filter((n) => n.id !== id));
+    await supabase.from("notes").delete().eq("id", id);
+    router.refresh();
+  }, [supabase, router]);
 
   const signOut = useCallback(async () => {
     await supabase.auth.signOut();
@@ -142,13 +127,47 @@ export function NotesUI() {
           >
             {saving ? "Saving…" : "Save"}
           </button>
+          {error && (
+            <p className="mt-3 text-red-600 text-sm" role="alert">
+              {error}
+            </p>
+          )}
         </div>
 
-        {results.length > 0 && (
+        {notes.length > 0 && (
+          <div className="max-w-[720px] mx-auto mt-8">
+            <h2 className="font-display text-lg text-charcoal mb-4">
+              Your notes
+            </h2>
+            <ul className="space-y-3">
+              {notes.map((note) => (
+                <li
+                  key={note.id}
+                  className="p-4 rounded border border-charcoal/10 bg-cream-dark flex justify-between gap-4"
+                >
+                  <p className="text-charcoal whitespace-pre-wrap flex-1 min-w-0">{note.content}</p>
+                  <button
+                    type="button"
+                    onClick={() => deleteNote(note.id)}
+                    className="shrink-0 p-1 text-muted hover:text-red-600 transition-colors"
+                    aria-label="Delete note"
+                  >
+                    <TrashIcon />
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {results !== null && (
           <div className="max-w-[720px] mx-auto mt-12">
             <h2 className="font-display text-lg text-charcoal mb-4">
               Search results
             </h2>
+            {results.length === 0 ? (
+              <p className="text-muted">No matching notes. Add notes and wait a moment for embeddings to generate.</p>
+            ) : (
             <ul className="space-y-3">
               {results.map((note, i) => (
                 <li
@@ -164,10 +183,23 @@ export function NotesUI() {
                 </li>
               ))}
             </ul>
+            )}
           </div>
         )}
       </main>
     </div>
+  );
+}
+
+function TrashIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <path d="M3 6h18" />
+      <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+      <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+      <line x1="10" y1="11" x2="10" y2="17" />
+      <line x1="14" y1="11" x2="14" y2="17" />
+    </svg>
   );
 }
 
