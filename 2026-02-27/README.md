@@ -10,14 +10,12 @@ Personal notes app with AI-powered semantic search. Search by meaning, not keywo
    pnpm exec supabase start
    ```
 
-2. **Copy env** from `supabase status -o env` or create `.env.local`:
+2. **Create `.env.local`** with values from `supabase status`:
 
    ```
    NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321
-   NEXT_PUBLIC_SUPABASE_ANON_KEY=<ANON_KEY from output, use eyJ... format not sb_publishable_>
+   NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=<Publishable key from supabase status>
    ```
-
-   Edge functions reject JWTs from `PUBLISHABLE_KEY`; use `ANON_KEY`.
 
 3. **Run migrations** (if not auto-applied):
 
