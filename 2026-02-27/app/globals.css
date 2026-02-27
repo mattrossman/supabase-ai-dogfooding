@@ -1,6 +1,4 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
 @keyframes fadeSlideIn {
   from {
@@ -19,6 +17,16 @@
   --charcoal: #2c2a26;
   --muted: #6b6560;
   --accent: #c45c3e;
+}
+
+@theme inline {
+  --color-cream: var(--cream);
+  --color-cream-dark: var(--cream-dark);
+  --color-charcoal: var(--charcoal);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --font-display: var(--font-fraunces), Georgia, serif;
+  --font-body: var(--font-source-serif), Georgia, serif;
 }
 
 body {
