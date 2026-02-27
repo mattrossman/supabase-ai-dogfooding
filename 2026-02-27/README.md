@@ -7,7 +7,7 @@ Personal notes app with AI-powered semantic search. Search by meaning, not keywo
 1. **Start Supabase** (requires Docker):
 
    ```bash
-   pnpm exec supabase start
+   pnpm supabase start
    ```
 
 2. **Create `.env.local`** with values from `supabase status`:
@@ -17,26 +17,22 @@ Personal notes app with AI-powered semantic search. Search by meaning, not keywo
    NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=<Publishable key from supabase status>
    ```
 
-3. **Run migrations** (if not auto-applied):
+3. **Start Edge Functions** (in a separate terminal):
 
    ```bash
-   pnpm exec supabase db reset
+   pnpm supabase functions serve
    ```
 
-4. **Start Edge Functions** (in a separate terminal):
-
-   ```bash
-   pnpm exec supabase functions serve
-   ```
-
-5. **Start the app**:
+4. **Start the app**:
 
    ```bash
    pnpm dev
    ```
 
+> To reset the database and reseed: `pnpm supabase db reset`
+
 **MCP:** `.mcp.json` and `.cursor/mcp.json` configure Supabase local + Next.js dev MCP. Requires `supabase start` and `pnpm dev` running.
 
-Open http://localhost:3000. Sign up or use the demo account (demo@example.com / demo123). Write notes, save. Search finds notes by meaning (e.g. "stress at work" → "deadlines piling up").
+Open http://localhost:3000. Sign up or use the demo account (demo@example.com / demo123). Write notes, save. Search navigates to `/notes/search` and finds notes by meaning (e.g. "stress at work" → "deadlines piling up").
 
 **Demo account** is seeded on every `supabase db reset`.
