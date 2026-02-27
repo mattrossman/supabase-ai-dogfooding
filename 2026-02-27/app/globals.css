@@ -1,0 +1,27 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@keyframes fadeSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+:root {
+  --cream: #faf9f7;
+  --cream-dark: #f5f3ef;
+  --charcoal: #2c2a26;
+  --muted: #6b6560;
+  --accent: #c45c3e;
+}
+
+body {
+  background-color: var(--cream);
+  color: var(--charcoal);
+}
