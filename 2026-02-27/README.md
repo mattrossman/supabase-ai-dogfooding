@@ -35,6 +35,8 @@ Personal notes app with AI-powered semantic search. Search by meaning, not keywo
    pnpm dev
    ```
 
+**MCP:** `.mcp.json` and `.cursor/mcp.json` configure Supabase local + Next.js dev MCP. Requires `supabase start` and `pnpm dev` running.
+
 Open http://localhost:3000. Sign up or use the demo account (demo@example.com / demo123). Write notes, save. Search finds notes by meaning (e.g. "stress at work" → "deadlines piling up").
 
 **Demo account** is seeded on every `supabase db reset`.
