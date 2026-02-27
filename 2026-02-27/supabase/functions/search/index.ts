@@ -38,7 +38,7 @@ Deno.serve(async (req) => {
 
     const { data, error } = await supabase.rpc("match_notes", {
       query_embedding: embedding,
-      match_threshold: 0.7,
+      match_threshold: 0.5,
       match_count: 10,
     });
 

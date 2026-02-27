@@ -16,7 +16,7 @@ export default async function NotesPage() {
     .from("notes")
     .select("id, content")
     .order("created_at", { ascending: false })
-    .limit(50);
+    .limit(10);
 
   return <NotesUI initialNotes={notes ?? []} />;
 }

@@ -365,6 +365,16 @@ inspector_port = 8083
 # The Deno major version to use.
 deno_version = 2
 
+# Disable gateway-level JWT verification for both functions.
+# The local runtime has a bug verifying ES256 JWTs (TypeError: Key for the ES256 algorithm
+# must be of type CryptoKey). Auth is still enforced — each function creates its own
+# Supabase client with the user's JWT and relies on RLS for row-level access control.
+[functions.generate-embedding]
+verify_jwt = false
+
+[functions.search]
+verify_jwt = false
+
 # [edge_runtime.secrets]
 # secret_key = "env(SECRET_VALUE)"
 

@@ -14,8 +14,10 @@ Personal notes app with AI-powered semantic search. Search by meaning, not keywo
 
    ```
    NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321
-   NEXT_PUBLIC_SUPABASE_ANON_KEY=<anon key from supabase start>
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=<ANON_KEY from output, use eyJ... format not sb_publishable_>
    ```
+
+   Edge functions reject JWTs from `PUBLISHABLE_KEY`; use `ANON_KEY`.
 
 3. **Run migrations** (if not auto-applied):
 
