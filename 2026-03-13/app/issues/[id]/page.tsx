@@ -1,23 +1,9 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import {
-  STATUS_LABELS,
-  STATUS_ORDER,
-  PRIORITY_LABELS,
-  type IssueStatus,
-  type IssuePriority,
-} from "@/lib/types";
-import { updateIssuePriority, deleteIssue } from "@/actions/issues";
+import { deleteIssue } from "@/actions/issues";
 import { StatusSelect } from "../StatusSelect";
-
-const PRIORITY_ORDER: IssuePriority[] = [
-  "no_priority",
-  "urgent",
-  "high",
-  "medium",
-  "low",
-];
+import { PrioritySelect } from "../PrioritySelect";
 
 export default async function IssuePage({
   params,
@@ -33,11 +19,6 @@ export default async function IssuePage({
     .single();
 
   if (!issue) notFound();
-
-  async function changePriority(formData: FormData) {
-    "use server";
-    await updateIssuePriority(id, formData.get("priority") as IssuePriority);
-  }
 
   async function handleDelete() {
     "use server";
@@ -76,25 +57,7 @@ export default async function IssuePage({
 
           <div className="flex items-center gap-6">
             <span className="w-20 text-xs text-zinc-600">Priority</span>
-            <form action={changePriority} className="flex items-center gap-2">
-              <select
-                name="priority"
-                defaultValue={issue.priority}
-                className="rounded border border-transparent bg-transparent text-xs text-zinc-400 hover:border-zinc-700 focus:border-zinc-600 focus:outline-none cursor-pointer"
-              >
-                {PRIORITY_ORDER.map((p) => (
-                  <option key={p} value={p}>
-                    {PRIORITY_LABELS[p]}
-                  </option>
-                ))}
-              </select>
-              <button
-                type="submit"
-                className="rounded bg-zinc-800 px-2 py-0.5 text-xs text-zinc-400 hover:bg-zinc-700"
-              >
-                Save
-              </button>
-            </form>
+            <PrioritySelect issue={issue} />
           </div>
 
           <div className="flex items-center gap-6">

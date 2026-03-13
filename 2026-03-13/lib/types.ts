@@ -23,9 +23,9 @@ export const PRIORITY_LABELS: Record<IssuePriority, string> = {
 };
 
 export const STATUS_ORDER: IssueStatus[] = [
-  "backlog",
-  "todo",
   "in_progress",
+  "todo",
+  "backlog",
   "done",
   "canceled",
 ];
