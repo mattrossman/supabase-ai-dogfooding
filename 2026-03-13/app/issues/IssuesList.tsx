@@ -7,6 +7,9 @@ import {
   DragEndEvent,
   DragOverlay,
   DragStartEvent,
+  PointerSensor,
+  useSensor,
+  useSensors,
   useDroppable,
   useDraggable,
 } from "@dnd-kit/core";
@@ -192,6 +195,9 @@ function StatusGroup({
 export function IssuesList({ initialIssues }: { initialIssues: Issue[] }) {
   const [issues, setIssues] = useState(initialIssues);
   const [activeId, setActiveId] = useState<string | null>(null);
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } })
+  );
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const lastSelectedId = useRef<string | null>(null);
   const [, startTransition] = useTransition();
@@ -337,7 +343,7 @@ export function IssuesList({ initialIssues }: { initialIssues: Issue[] }) {
         </div>
       )}
 
-      <DndContext id="issues-dnd" onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+      <DndContext id="issues-dnd" sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
         {STATUS_ORDER.map((status) => {
           const group = grouped[status];
           if (group.length === 0) return null;
