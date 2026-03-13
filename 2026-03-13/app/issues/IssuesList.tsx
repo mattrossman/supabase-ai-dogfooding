@@ -19,8 +19,6 @@ import {
   type IssueStatus,
   type IssuePriority,
 } from "@/lib/types";
-import { StatusSelect } from "./StatusSelect";
-
 const STATUS_ICONS: Record<IssueStatus, string> = {
   backlog: "○",
   todo: "◌",
@@ -107,11 +105,8 @@ function IssueRow({
         isDragging ? "opacity-50" : ""
       }`}
     >
-      {/* Prevent the select from starting a drag */}
-      <div onPointerDown={(e) => e.stopPropagation()}>
-        <StatusSelect issue={issue} />
-      </div>
       <PriorityIcon priority={issue.priority} />
+      <span className="text-xs text-zinc-600">{STATUS_ICONS[issue.status]}</span>
       <Link
         href={`/issues/${issue.id}`}
         className="flex-1 truncate text-sm hover:text-violet-300"
@@ -205,7 +200,7 @@ export function IssuesList({ initialIssues }: { initialIssues: Issue[] }) {
   }
 
   return (
-    <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+    <DndContext id="issues-dnd" onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
       {STATUS_ORDER.map((status) => {
         const group = grouped[status];
         if (group.length === 0) return null;
