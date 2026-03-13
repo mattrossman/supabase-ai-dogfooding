@@ -15,6 +15,15 @@ For supported bash commands, see https://github.com/vercel-labs/just-bash/blob/c
 
 Treat Supabase's declarative schemas as the source of truth during development. Do not write migration files manually or manually execute SQL to modify the database schema.
 
+Docs: https://supabase.com/docs/guides/local-development/declarative-database-schemas
+
 ## Preferred tooling
 
 - Package manager: `pnpm`
+
+# Supabase CLI usage
+
+`supabase` is installed as a devDependency, invoke it with `pnpm` prefix.
+
+- Correct: `pnpm supabase status`
+- Incorrect: `supabase status`
