@@ -7,6 +7,7 @@ export default async function IssuesPage() {
   const { data: issues } = await supabase
     .from("issues")
     .select("*")
+    .is("deleted_at", null)
     .order("created_at", { ascending: false });
 
   return (

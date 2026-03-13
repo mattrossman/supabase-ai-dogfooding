@@ -1,9 +1,9 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { deleteIssue } from "@/actions/issues";
 import { StatusSelect } from "../StatusSelect";
 import { PrioritySelect } from "../PrioritySelect";
+import { DeleteIssueButton } from "./DeleteIssueButton";
 
 export default async function IssuePage({
   params,
@@ -19,11 +19,6 @@ export default async function IssuePage({
     .single();
 
   if (!issue) notFound();
-
-  async function handleDelete() {
-    "use server";
-    await deleteIssue(id);
-  }
 
   return (
     <div className="mx-auto max-w-3xl px-6 py-10">
@@ -73,14 +68,9 @@ export default async function IssuePage({
         </div>
       </div>
 
-      <form action={handleDelete} className="mt-8">
-        <button
-          type="submit"
-          className="text-xs text-zinc-700 hover:text-red-500"
-        >
-          Delete issue
-        </button>
-      </form>
+      <div className="mt-8">
+        <DeleteIssueButton id={id} />
+      </div>
     </div>
   );
 }

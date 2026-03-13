@@ -37,6 +37,7 @@ export type Database = {
       issues: {
         Row: {
           created_at: string
+          deleted_at: string | null
           description: string | null
           id: string
           priority: Database["public"]["Enums"]["issue_priority"]
@@ -46,6 +47,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          deleted_at?: string | null
           description?: string | null
           id?: string
           priority?: Database["public"]["Enums"]["issue_priority"]
@@ -55,6 +57,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          deleted_at?: string | null
           description?: string | null
           id?: string
           priority?: Database["public"]["Enums"]["issue_priority"]

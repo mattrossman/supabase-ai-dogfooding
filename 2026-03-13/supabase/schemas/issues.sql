@@ -8,7 +8,8 @@ create table issues (
   status      issue_status not null default 'backlog',
   priority    issue_priority not null default 'no_priority',
   created_at  timestamptz not null default now(),
-  updated_at  timestamptz not null default now()
+  updated_at  timestamptz not null default now(),
+  deleted_at  timestamptz
 );
 
 create or replace function update_updated_at()

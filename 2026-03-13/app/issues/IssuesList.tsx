@@ -252,6 +252,9 @@ export function IssuesList({ initialIssues }: { initialIssues: Issue[] }) {
 
       e.preventDefault();
       const ids = Array.from(selectedIds);
+      const count = ids.length;
+
+      if (!confirm(`Move ${count} issue${count === 1 ? "" : "s"} to trash?`)) return;
 
       // Optimistic removal
       setIssues((prev) => prev.filter((i) => !selectedIds.has(i.id)));

@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { createIssue } from "@/actions/issues";
 import { STATUS_LABELS, STATUS_ORDER, PRIORITY_LABELS } from "@/lib/types";
@@ -15,9 +15,21 @@ const PRIORITY_ORDER = [
 
 export function NewIssueForm() {
   const [error, action, isPending] = useActionState(createIssue, null);
+  const formRef = useRef<HTMLFormElement>(null);
+
+  useEffect(() => {
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.metaKey && e.key === "Enter") {
+        e.preventDefault();
+        formRef.current?.requestSubmit();
+      }
+    }
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, []);
 
   return (
-    <form action={action} className="space-y-5">
+    <form ref={formRef} action={action} className="space-y-5">
       <div>
         <input
           name="title"

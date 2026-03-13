@@ -44,14 +44,31 @@ export async function updateIssuePriority(
 
 export async function deleteIssue(id: string): Promise<void> {
   const supabase = await createClient();
-  await supabase.from("issues").delete().eq("id", id);
+  await supabase.from("issues").update({ deleted_at: new Date().toISOString() }).eq("id", id);
   revalidatePath("/issues");
+  revalidatePath("/issues/trash");
   redirect("/issues");
 }
 
 export async function deleteIssues(ids: string[]): Promise<void> {
   if (ids.length === 0) return;
   const supabase = await createClient();
-  await supabase.from("issues").delete().in("id", ids);
+  await supabase.from("issues").update({ deleted_at: new Date().toISOString() }).in("id", ids);
   revalidatePath("/issues");
+  revalidatePath("/issues/trash");
+}
+
+export async function restoreIssues(ids: string[]): Promise<void> {
+  if (ids.length === 0) return;
+  const supabase = await createClient();
+  await supabase.from("issues").update({ deleted_at: null }).in("id", ids);
+  revalidatePath("/issues");
+  revalidatePath("/issues/trash");
+}
+
+export async function permanentlyDeleteIssues(ids: string[]): Promise<void> {
+  if (ids.length === 0) return;
+  const supabase = await createClient();
+  await supabase.from("issues").delete().in("id", ids);
+  revalidatePath("/issues/trash");
 }
