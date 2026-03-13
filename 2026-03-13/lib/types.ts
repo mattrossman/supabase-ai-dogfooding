@@ -22,6 +22,14 @@ export const PRIORITY_LABELS: Record<IssuePriority, string> = {
   low: "Low",
 };
 
+export const PRIORITY_ORDER: IssuePriority[] = [
+  "urgent",
+  "high",
+  "medium",
+  "low",
+  "no_priority",
+];
+
 export const STATUS_ORDER: IssueStatus[] = [
   "in_progress",
   "todo",

@@ -14,6 +14,7 @@ import { updateIssueStatus } from "@/actions/issues";
 import {
   STATUS_LABELS,
   STATUS_ORDER,
+  PRIORITY_ORDER,
   type Issue,
   type IssueStatus,
   type IssuePriority,
@@ -100,19 +101,16 @@ function IssueRow({
     <div
       ref={setNodeRef}
       style={style}
-      className={`flex items-center gap-4 border-b border-zinc-800/50 px-6 py-3 hover:bg-zinc-900/50 ${
+      {...listeners}
+      {...attributes}
+      className={`flex items-center gap-4 border-b border-zinc-800/50 px-6 py-3 hover:bg-zinc-900/50 cursor-grab active:cursor-grabbing ${
         isDragging ? "opacity-50" : ""
       }`}
     >
-      <div
-        {...listeners}
-        {...attributes}
-        className="cursor-grab active:cursor-grabbing text-zinc-600 hover:text-zinc-400 select-none"
-        title="Drag to change status"
-      >
-        ⠿
+      {/* Prevent the select from starting a drag */}
+      <div onPointerDown={(e) => e.stopPropagation()}>
+        <StatusSelect issue={issue} />
       </div>
-      <StatusSelect issue={issue} />
       <PriorityIcon priority={issue.priority} />
       <Link
         href={`/issues/${issue.id}`}
@@ -136,19 +134,18 @@ function StatusGroup({
   const { setNodeRef, isOver } = useDroppable({ id: status });
 
   return (
-    <section>
-      <div
-        className={`flex items-center gap-2 px-6 py-2 text-xs text-zinc-500 sticky top-0 border-b border-zinc-800/50 transition-colors ${
-          isOver ? "bg-zinc-800/80" : "bg-[#0f0f0f]"
-        }`}
-      >
+    <section
+      ref={setNodeRef}
+      className={`transition-colors ${isOver ? "bg-zinc-800/30" : ""}`}
+    >
+      <div className="flex items-center gap-2 px-6 py-2 text-xs text-zinc-500 sticky top-0 bg-[#0f0f0f] border-b border-zinc-800/50">
         <span>{STATUS_ICONS[status]}</span>
         <span>{STATUS_LABELS[status]}</span>
         <span className="ml-1 rounded bg-zinc-800 px-1.5 py-0.5 text-zinc-400">
           {issues.length}
         </span>
       </div>
-      <div ref={setNodeRef} className="min-h-[4px]">
+      <div className="min-h-[4px]">
         {issues.map((issue) => (
           <IssueRow
             key={issue.id}
@@ -168,7 +165,14 @@ export function IssuesList({ initialIssues }: { initialIssues: Issue[] }) {
 
   const grouped = STATUS_ORDER.reduce<Record<IssueStatus, Issue[]>>(
     (acc, status) => {
-      acc[status] = issues.filter((i) => i.status === status);
+      acc[status] = issues
+        .filter((i) => i.status === status)
+        .sort((a, b) => {
+          const pa = PRIORITY_ORDER.indexOf(a.priority);
+          const pb = PRIORITY_ORDER.indexOf(b.priority);
+          if (pa !== pb) return pa - pb;
+          return a.title.localeCompare(b.title);
+        });
       return acc;
     },
     {} as Record<IssueStatus, Issue[]>
@@ -215,10 +219,9 @@ export function IssuesList({ initialIssues }: { initialIssues: Issue[] }) {
         );
       })}
 
-      <DragOverlay>
+      <DragOverlay dropAnimation={null}>
         {activeIssue ? (
           <div className="flex items-center gap-4 border border-zinc-700 rounded bg-zinc-900 px-6 py-3 shadow-lg opacity-90 text-sm">
-            <span className="text-zinc-600">⠿</span>
             <span className="text-zinc-400 text-xs">
               {STATUS_ICONS[activeIssue.status]}
             </span>
