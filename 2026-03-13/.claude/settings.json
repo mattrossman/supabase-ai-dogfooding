@@ -1,7 +1,9 @@
 {
   "permissions": {
     "allow": [
-      "Bash(ssh 127.0.0.1 *)"
+      "Bash(ssh 127.0.0.1 *)",
+      "Bash(ssh localhost *)",
+      "Bash(pnpm build)"
     ]
   }
 }

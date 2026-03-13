@@ -14,3 +14,7 @@ For supported bash commands, see https://github.com/vercel-labs/just-bash/blob/c
 ## Database workflow
 
 Treat Supabase's declarative schemas as the source of truth during development. Do not write migration files manually or manually execute SQL to modify the database schema.
+
+## Preferred tooling
+
+- Package manager: `pnpm`
