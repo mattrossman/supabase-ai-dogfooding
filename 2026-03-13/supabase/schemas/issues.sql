@@ -13,7 +13,9 @@ create table issues (
 );
 
 create or replace function update_updated_at()
-returns trigger language plpgsql as $$
+returns trigger language plpgsql
+set search_path = ''
+as $$
 begin
   new.updated_at = now();
   return new;
@@ -27,13 +29,13 @@ create trigger issues_updated_at
 alter table issues enable row level security;
 
 create policy "authenticated read" on issues for select
-  using (auth.role() = 'authenticated');
+  using ((select auth.role()) = 'authenticated');
 
 create policy "authenticated insert" on issues for insert
-  with check (auth.role() = 'authenticated');
+  with check ((select auth.role()) = 'authenticated');
 
 create policy "authenticated update" on issues for update
-  using (auth.role() = 'authenticated');
+  using ((select auth.role()) = 'authenticated');
 
 create policy "authenticated delete" on issues for delete
-  using (auth.role() = 'authenticated');
+  using ((select auth.role()) = 'authenticated');
