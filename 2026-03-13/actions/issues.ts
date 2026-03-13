@@ -48,3 +48,10 @@ export async function deleteIssue(id: string): Promise<void> {
   revalidatePath("/issues");
   redirect("/issues");
 }
+
+export async function deleteIssues(ids: string[]): Promise<void> {
+  if (ids.length === 0) return;
+  const supabase = await createClient();
+  await supabase.from("issues").delete().in("id", ids);
+  revalidatePath("/issues");
+}
